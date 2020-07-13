@@ -3,9 +3,7 @@
   "version": "1.0.0",
   "description": "XBoxLive API Service",
   "main": "server.js",
-  "scripts": {
-    "start": "nodemon ./server.js localhost 3000"
-  },
+  "scripts": {},
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Microsoft/TypeScript-Node-Starter.git"
