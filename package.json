@@ -1,0 +1,32 @@
+{
+  "name": "xboxliveservice",
+  "version": "1.0.0",
+  "description": "XBoxLive API Service",
+  "main": "server.js",
+  "scripts": {
+    "start": "nodemon ./server.js localhost 3000"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Microsoft/TypeScript-Node-Starter.git"
+  },
+  "keywords": [
+    "XBox",
+    "Node"
+  ],
+  "author": "Ajit Panada",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Microsoft/TypeScript-Node-Starter/issues"
+  },
+  "homepage": "https://github.com/Microsoft/TypeScript-Node-Starter#readme",
+  "dependencies": {
+    "@xboxreplay/xboxlive-api": "^3.4.1",
+    "@xboxreplay/xboxlive-auth": "^3.3.0",
+    "body-parser": "^1.19.0",
+    "cookie-parser": "^1.4.5",
+    "express": "^4.17.1",
+    "querystring": "^0.2.0",
+    "request": "^2.88.2"
+  }
+}
