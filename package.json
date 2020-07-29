@@ -19,12 +19,15 @@
   },
   "homepage": "https://github.com/Microsoft/TypeScript-Node-Starter#readme",
   "dependencies": {
+    "@microsoft/microsoft-graph-client": "^2.0.0",
     "@xboxreplay/xboxlive-api": "^3.4.1",
     "@xboxreplay/xboxlive-auth": "^3.3.0",
     "body-parser": "^1.19.0",
     "cookie-parser": "^1.4.5",
     "express": "^4.17.1",
+    "msal": "^1.0.0",
     "querystring": "^0.2.0",
-    "request": "^2.88.2"
+    "request": "^2.88.2",
+    "xbox-smartglass-core-node": "^0.6.4"
   }
 }

@@ -3,6 +3,5 @@
         "node_modules{,/**}",
         ".vscode{,/**}"
     ],
-    "appService.defaultWebAppToDeploy": "/subscriptions/9e9d8a58-6c9b-4cdb-8a7b-6450e36a6f51/resourceGroups/xboxliveservice/providers/Microsoft.Web/sites/xboxliveservice",
     "appService.deploySubpath": "."
 }
