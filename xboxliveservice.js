@@ -1,6 +1,7 @@
 const XboxLiveAuth = require("@xboxreplay/xboxlive-auth");
 const XboxLiveAPI = require("@xboxreplay/xboxlive-api");
-const Smartglass = require('xbox-smartglass-core-node')
+const Smartglass = require("xbox-smartglass-core-node");
+const keyvaultservice = require("./keyvaultservice");
 
 const playerMetadata = [
   "UniqueModernGamertag",
@@ -23,140 +24,235 @@ const playerMetadata = [
   "IsQuarantined",
   "DisplayedLinkedAccounts",
 ];
-var deviceStatus = {
-  current_app: false,
-  connection_status: false,
-  client: false
-}
+
+let XBoxLive = {
+  token: null,
+
+  get userToken() {
+    return this.token;
+  },
+
+  set userToken(value) {
+    this.token = value;
+  },
+};
 
 module.exports = {
-
-  async XBoxLiveAuthentication(username, password) {
-    return await XboxLiveAuth.authenticate(username, password);
+  async XBoxLiveAuthentication(req, res) {
+    try {
+      const secret = await keyvaultservice.getLatestSecret(res, "token");
+      if (secret && secret.statusCode == 404) {
+        const token = await XboxLiveAuth.authenticate(
+          req.body.username,
+          req.body.password
+        );
+        keyvaultservice.setSecret(res, "token", JSON.stringify(token));
+        XBoxLive.userToken = token;
+      } else {
+        const token = JSON.parse(secret.value);
+        XBoxLive.userToken = token;
+      }
+      res.status(200).send(XBoxLive.userToken);
+    } catch (err) {
+      res.status(500).send(err);
+    }
   },
-  async XBoxLiveAccountDetails(gamerTag, username, password) {
-    const tokenResponse = await module.exports.XBoxLiveAuthentication(
-      username,
-      password
-    );
-    return await XboxLiveAPI.getPlayerSettings(
-      gamerTag,
-      {
-        userHash: tokenResponse.userHash,
-        XSTSToken: tokenResponse.XSTSToken,
-      },
-      playerMetadata
-    );
-  },
-  async XBoxCustomGETAPI(baseUrl, url, username, password) {
-    const tokenResponse = await module.exports.XBoxLiveAuthentication(
-      username,
-      password
-    );
-    return await XboxLiveAPI.call(
-      {
-        url: `${baseUrl}/${url}`,
-        method: "GET",
-      },
-      {
-        userHash: tokenResponse.userHash,
-        XSTSToken: tokenResponse.XSTSToken,
-      },
-      2
-    );
-  },
-  async ChangeGamerTag(xuid,uhash,token, newgt)
-  {
-    xuid = parseInt(xuid)
-    console.log(xuid);
-    return await XboxLiveAPI.call(
-      {
-        url: "https://accounts.xboxlive.com//users/current/profile/gamertag",
-        method: "post",
-        data: {
-          "gamertag": newgt,
-          "preview": false,
-          "reservationId": xuid
+  async XBoxLiveAccountDetails(req, res) {
+    try {
+      if (XBoxLive.userToken == null) {
+        await module.exports.XBoxLiveAuthentication(req, res);
+      }
+      return await XboxLiveAPI.getPlayerSettings(
+        req.body.gamerTag,
+        {
+          userHash: XBoxLive.userToken.userHash,
+          XSTSToken: XBoxLive.userToken.XSTSToken,
         },
-      },
-      {
-        userHash: uhash,
-        XSTSToken: token,
-      },
-      2
-    );
+        playerMetadata
+      );
+    } catch (err) {
+      res.status(500).send(err);
+    }
   },
-  async XBoxCustomPOSTAPI(baseUrl, url, body, username, password) {
-    const tokenResponse = await module.exports.XBoxLiveAuthentication(
-      username,
-      password
-    );
-    return await XboxLiveAPI.call(
-      {
-        url: `${baseUrl}/${url}`,
-        method: "GET",
-        body: body,
-      },
-      {
-        userHash: tokenResponse.userHash,
-        XSTSToken: tokenResponse.XSTSToken,
-      },
-      2
-    );
+  async XBoxCustomGETAPI(baseUrl, url, req, res) {
+    try {
+      if (XBoxLive.userToken == null) {
+        await module.exports.XBoxLiveAuthentication(req, res);
+      }
+      return await XboxLiveAPI.call(
+        {
+          url: `${baseUrl}/${url}`,
+          method: "GET",
+        },
+        {
+          userHash: XBoxLive.userToken.userHash,
+          XSTSToken: XBoxLive.userToken.XSTSToken,
+        },
+        2
+      );
+    } catch (err) {
+      res.status(500).send(err);
+    }
   },
-  async XBoxLiveGamerXUID(gamerTag, username, password) {
-    const tokenResponse = await module.exports.XBoxLiveAuthentication(
-      username,
-      password
-    );
-    return await XboxLiveAPI.getPlayerXUID(gamerTag, {
-      userHash: tokenResponse.userHash,
-      XSTSToken: tokenResponse.XSTSToken,
-    });
+  async ChangeGamerTag(req, res) {
+    try {
+      if (XBoxLive.userToken == null) {
+        await module.exports.XBoxLiveAuthentication(req, res);
+      }
+      return await XboxLiveAPI.call(
+        {
+          url: "https://accounts.xboxlive.com//users/current/profile/gamertag",
+          method: "POST",
+          data: {
+            gamertag: req.body.gamerTag,
+            preview: false,
+            reservationId: parseInt(XBoxLive.userToken.userXUID),
+          },
+        },
+        {
+          userHash: XBoxLive.userToken.userHash,
+          XSTSToken: XBoxLive.userToken.XSTSToken,
+        },
+        2
+      );
+    } catch (err) {
+      res.status(500).send(err);
+    }
   },
-   async getMyScreenshots(xuid,uhash,token)
-  { 
-    return await XboxLiveAPI.getPlayerScreenshots(xuid, {
-      userHash: uhash,
-      XSTSToken: token,
-    });
+  async XBoxCustomPOSTAPI(baseUrl, url, body, req, res) {
+    try {
+      if (XBoxLive.userToken == null) {
+        await module.exports.XBoxLiveAuthentication(req, res);
+      }
+      return await XboxLiveAPI.call(
+        {
+          url: `${baseUrl}/${url}`,
+          method: "POST",
+          body: body,
+        },
+        {
+          userHash: XBoxLive.userToken.userHash,
+          XSTSToken: XBoxLive.userToken.XSTSToken,
+        },
+        2
+      );
+    } catch (err) {
+      res.status(500).send(err);
+    }
+  },
+  async XBoxLiveGamerXUID(req, res) {
+    try {
+      if (XBoxLive.userToken == null) {
+        await module.exports.XBoxLiveAuthentication(req, res);
+      }
+      return await XboxLiveAPI.getPlayerXUID(req.body.gamerTag, {
+        userHash: XBoxLive.userToken.userHash,
+        XSTSToken: XBoxLive.userToken.XSTSToken,
+      });
+    } catch (err) {
+      res.status(500).send(err);
+    }
+  },
+  async getMyScreenshots(req, res) {
+    try {
+      if (XBoxLive.userToken == null) {
+        await module.exports.XBoxLiveAuthentication(req, res);
+      }
+      return await XboxLiveAPI.getPlayerScreenshots(
+        req.body.gamerTag,
+        {
+          userHash: XBoxLive.userToken.userHash,
+          XSTSToken: XBoxLive.userToken.XSTSToken,
+        },
+        {
+          maxItems: 25,
+        }
+      );
+    } catch (err) {
+      res.status(500).send(err);
+    }
   },
 
-  async getMyGamerClips(xuid,uhash,token)
-  {
-    return await XboxLiveAPI.call(
-      {
-        url: "https://gameclipsmetadata.xboxlive.com//users/me/clips",
-        method: "GET",
-      },
-      {
-        userHash: uhash,
-        XSTSToken: token,
-      },
-      2
-    );
+  async getMyGamerClips(req, res) {
+    try {
+      if (XBoxLive.userToken == null) {
+        await module.exports.XBoxLiveAuthentication(req, res);
+      }
+      return await XboxLiveAPI.getPlayerGameClips(
+        req.body.gamerTag,
+        {
+          userHash: XBoxLive.userToken.userHash,
+          XSTSToken: XBoxLive.userToken.XSTSToken,
+        },
+        {
+          maxItems: 25,
+        }
+      );
+    } catch (err) {
+      res.status(500).send(err);
+    }
   },
 
-  async  getMyfriends(xuid,uhash,token)
-  {
-    return await XboxLiveAPI.call(
-      {
-        url: "https://social.xboxlive.com/users/xuid(2535469913557889)/people",
-        method: "GET",
-      },
-      {
-        userHash: uhash,
-        XSTSToken: token,
-      },
-      2
-    );
+  async getMyFriends(req, res) {
+    try {
+      if (XBoxLive.userToken == null) {
+        await module.exports.XBoxLiveAuthentication(req, res);
+      }
+      return await XboxLiveAPI.call(
+        {
+          url: `https://social.xboxlive.com/users/xuid(${parseInt(
+            XBoxLive.userToken.userXUID
+          )})/people`,
+          method: "GET",
+        },
+        {
+          userHash: XBoxLive.userToken.userHash,
+          XSTSToken: XBoxLive.userToken.XSTSToken,
+        },
+        2
+      );
+    } catch (err) {
+      res.status(500).send(err);
+    }
   },
 
-  async PlayerActivityHistory(token)
-  {
-    return await XboxLiveAPI.getPlayerActivityHistory(token.userXUID, {
-      userHash: token.userHash,
-      XSTSToken: token.XSTSToken,
-    });
+  async getMyAchievements(req, res) {
+    try {
+      if (XBoxLive.userToken == null) {
+        await module.exports.XBoxLiveAuthentication(req, res);
+      }
+      return await XboxLiveAPI.call(
+        {
+          url: `https://achievements.xboxlive.com/users/xuid(${parseInt(
+            XBoxLive.userToken.userXUID
+          )})/achievements`,
+          method: "GET",
+        },
+        {
+          userHash: XBoxLive.userToken.userHash,
+          XSTSToken: XBoxLive.userToken.XSTSToken,
+        },
+        2
+      );
+    } catch (err) {
+      res.status(500).send(err);
+    }
+  },
+
+  async PlayerActivityHistory(req, res) {
+    try {
+      if (XBoxLive.userToken == null) {
+        await module.exports.XBoxLiveAuthentication(req, res);
+      }
+      return await XboxLiveAPI.getPlayerActivityHistory(
+        parseInt(XBoxLive.userToken.userXUID),
+        {
+          userHash: XBoxLive.userToken.userHash,
+          XSTSToken: XBoxLive.userToken.XSTSToken,
+        }
+      );
+    } catch (err) {
+      res.status(500).send(err);
+    }
   },
 };

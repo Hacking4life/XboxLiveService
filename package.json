@@ -19,6 +19,9 @@
   },
   "homepage": "https://github.com/Microsoft/TypeScript-Node-Starter#readme",
   "dependencies": {
+    "@azure/identity": "^1.0.3",
+    "@azure/keyvault-secrets": "^4.0.4",
+    "dotenv": "^8.2.0",
     "@microsoft/microsoft-graph-client": "^2.0.0",
     "@xboxreplay/xboxlive-api": "^3.4.1",
     "@xboxreplay/xboxlive-auth": "^3.3.0",
@@ -29,5 +32,8 @@
     "querystring": "^0.2.0",
     "request": "^2.88.2",
     "xbox-smartglass-core-node": "^0.6.4"
+  },
+  "devDependencies": {
+    "@types/node": "^14.0.27"
   }
 }

@@ -3,5 +3,6 @@
         "node_modules{,/**}",
         ".vscode{,/**}"
     ],
-    "appService.deploySubpath": "."
+    "appService.deploySubpath": ".",
+    "appService.defaultWebAppToDeploy": "/subscriptions/337fa6f5-7b30-41f8-abb6-7921f33e4090/resourceGroups/hackxboxliveteams/providers/Microsoft.Web/sites/hackxboxliveteamsapi"
 }

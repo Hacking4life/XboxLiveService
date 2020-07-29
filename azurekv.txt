@@ -1,0 +1,24 @@
+az account list 
+
+az account set --subscription "337fa6f5-7b30-41f8-abb6-7921f33e4090"
+
+az ad sp create-for-rbac -n xboxlive --skip-assignment
+
+{
+  "appId": "d998975b-c0fe-48a1-af1b-6bc9562b76e9",
+  "displayName": "xboxlive",
+  "name": "http://xboxlive",
+  "password": "JU2-8Brj16OJC2BirRHebA4vaIa7ddyTGq",
+  "tenant": "2f316498-e5ca-43ea-9b8c-1177ecb81fc8"
+}
+
+export AZURE_CLIENT_ID="d998975b-c0fe-48a1-af1b-6bc9562b76e9"
+export AZURE_CLIENT_SECRET="JU2-8Brj16OJC2BirRHebA4vaIa7ddyTGq"
+export AZURE_TENANT_ID="2f316498-e5ca-43ea-9b8c-1177ecb81fc8"
+
+az keyvault create -n hackxboxliveteams -g hackxboxliveteams
+
+az keyvault set-policy --name hackxboxliveteams --spn $AZURE_CLIENT_ID --secret-permissions backup delete get list purge recover restore set
+
+az keyvault show --name hackxboxliveteams
+
