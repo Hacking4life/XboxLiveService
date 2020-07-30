@@ -40,19 +40,18 @@ let XBoxLive = {
 module.exports = {
   async XBoxLiveAuthentication(req, res) {
     try {
-      const secret = await keyvaultservice.getLatestSecret(res, "token");
-      if (secret && secret.statusCode == 404) {
+      const secret = await keyvaultservice.getLatestSecret(req.body.userId);
+      if (secret.statusCode == 404) {
         const token = await XboxLiveAuth.authenticate(
           req.body.username,
           req.body.password
         );
-        keyvaultservice.setSecret(res, "token", JSON.stringify(token));
+        keyvaultservice.createSecret(req.body.userId, JSON.stringify(token));
         XBoxLive.userToken = token;
       } else {
         const token = JSON.parse(secret.value);
         XBoxLive.userToken = token;
       }
-      res.status(200).send(XBoxLive.userToken);
     } catch (err) {
       res.status(500).send(err);
     }

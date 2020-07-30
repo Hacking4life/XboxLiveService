@@ -18,7 +18,7 @@ let KeyVault = {
 };
 
 module.exports = {
-  async createSecret(res, secretName, secretValue) {
+  async createSecret(secretName, secretValue) {
     try {
       const secret = await KeyVault.getSecretClient().setSecret(
         secretName,
@@ -26,20 +26,20 @@ module.exports = {
       );
       return secret;
     } catch (err) {
-      return res.status(err.statusCode).send(err);
+      return err;
     }
   },
-  async getLatestSecret(res, secretName) {
+  async getLatestSecret(secretName) {
     try {
       const latestSecret = await KeyVault.getSecretClient().getSecret(
         secretName
       );
       return latestSecret;
     } catch (err) {
-      return res.status(err.statusCode).send(err);
+      return err;
     }
   },
-  async getSpecificSecret(res, secretName) {
+  async getSpecificSecret(secretName) {
     try {
       const specificSecret = await KeyVault.getSecretClient().getSecret(
         secretName,
@@ -47,10 +47,10 @@ module.exports = {
       );
       return specificSecret;
     } catch (err) {
-      return res.status(err.statusCode).send(err);
+      return err;
     }
   },
-  async setSecret(res, secretName, secretValue, readable, tags) {
+  async setSecret(secretName, secretValue, readable, tags) {
     try {
       const secret = await KeyVault.getSecretClient().setSecret(
         secretName,
@@ -63,10 +63,10 @@ module.exports = {
 
       return secret;
     } catch (err) {
-      return res.status(err.statusCode).send(err);
+      return err;
     }
   },
-  async updateSecretProperties(res, secretName, readable, tags) {
+  async updateSecretProperties(secretName, readable, tags) {
     try {
       const latestSecret = await KeyVault.getSecretClient().getSecret(
         secretName
@@ -81,7 +81,7 @@ module.exports = {
       );
       return updatedSecret;
     } catch (err) {
-      return res.status(err.statusCode).send(err);
+      return err;
     }
   },
   async deleteSecret(secretName) {
@@ -99,13 +99,12 @@ module.exports = {
         }
         if (value.enabled) {
           const secret = await KeyVault.getSecretClient().getSecret(value.name);
-          console.log("secret: ", secret);
           secrets.push(secret);
         }
       }
       return secrets;
     } catch (err) {
-      return res.status(err.statusCode).send(err);
+      return err;
     }
   },
 };
