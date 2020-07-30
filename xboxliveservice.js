@@ -62,7 +62,7 @@ module.exports = {
         await module.exports.XBoxLiveAuthentication(req, res);
       }
       return await XboxLiveAPI.getPlayerSettings(
-        req.body.gamerTag,
+        parseInt(XBoxLive.userToken.userXUID),
         {
           userHash: XBoxLive.userToken.userHash,
           XSTSToken: XBoxLive.userToken.XSTSToken,
@@ -158,7 +158,7 @@ module.exports = {
         await module.exports.XBoxLiveAuthentication(req, res);
       }
       return await XboxLiveAPI.getPlayerScreenshots(
-        req.body.gamerTag,
+        parseInt(XBoxLive.userToken.userXUID),
         {
           userHash: XBoxLive.userToken.userHash,
           XSTSToken: XBoxLive.userToken.XSTSToken,
@@ -178,7 +178,7 @@ module.exports = {
         await module.exports.XBoxLiveAuthentication(req, res);
       }
       return await XboxLiveAPI.getPlayerGameClips(
-        req.body.gamerTag,
+        parseInt(XBoxLive.userToken.userXUID),
         {
           userHash: XBoxLive.userToken.userHash,
           XSTSToken: XBoxLive.userToken.XSTSToken,
