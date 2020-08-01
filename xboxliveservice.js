@@ -141,7 +141,7 @@ module.exports = {
   {
     return await XboxLiveAPI.call(
       {
-        url: "https://social.xboxlive.com/users/xuid(2535469913557889)/people",
+        url: `https://social.xboxlive.com/users/xuid(${xuid})/people`,
         method: "GET",
       },
       {
