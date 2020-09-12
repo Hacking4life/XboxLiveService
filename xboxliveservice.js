@@ -3,25 +3,14 @@ const XboxLiveAPI = require("@xboxreplay/xboxlive-api");
 const Smartglass = require('xbox-smartglass-core-node')
 
 const playerMetadata = [
-  "UniqueModernGamertag",
   "GameDisplayPicRaw",
   "Gamerscore",
   "Location",
   "Gamertag",
   "AccountTier",
   "XboxOneRep",
-  "PreferredColor",
   "RealName",
-  "Bio",
   "Location",
-  "ModernGamertag",
-  "ModernGamertagSuffix",
-  "UniqueModernGamertag",
-  "RealNameOverride",
-  "TenureLevel",
-  "Watermarks",
-  "IsQuarantined",
-  "DisplayedLinkedAccounts",
 ];
 var deviceStatus = {
   current_app: false,
@@ -34,41 +23,57 @@ module.exports = {
   async XBoxLiveAuthentication(username, password) {
     return await XboxLiveAuth.authenticate(username, password);
   },
-  async XBoxLiveAccountDetails(gamerTag, username, password) {
-    const tokenResponse = await module.exports.XBoxLiveAuthentication(
-      username,
-      password
-    );
+  async XBoxLiveAccountDetails(xuid, uhash, token) {
     return await XboxLiveAPI.getPlayerSettings(
-      gamerTag,
+      xuid,
       {
-        userHash: tokenResponse.userHash,
-        XSTSToken: tokenResponse.XSTSToken,
+        userHash: uhash,
+        XSTSToken: token,
       },
       playerMetadata
     );
   },
-  async XBoxCustomGETAPI(baseUrl, url, username, password) {
-    const tokenResponse = await module.exports.XBoxLiveAuthentication(
-      username,
-      password
-    );
+  async XBoxCustomPostAPI(baseUrl, url,  uhash, token,xuid) {
+
+    try{
+        return await XboxLiveAPI.call(
+          {
+            url: `${baseUrl}/${url}`,
+            method: "POST",
+                 data: {
+        userIds: xuid,
+        settings: ['GameDisplayName', 'AppDisplayName', 'AppDisplayPicRaw', 'GameDisplayPicRaw', 'PublicGamerpic', 'ShowUserAsAvatar', 'Gamerscore', 'Gamertag', 'AccountTier', 'TenureLevel', 'XboxOneRep', 'PreferredColor', 'Location', 'Bio', 'Watermarks', 'RealName', 'RealNameOverride']
+      },
+          },
+          {
+            userHash: uhash,
+            XSTSToken: token,
+          },
+          2
+        );
+    }catch(err){res.status(500).send(err)};
+  },
+  
+  async XBoxCustomGETAPI(baseUrl, url,  uhash, token) {
+
+try{
     return await XboxLiveAPI.call(
       {
         url: `${baseUrl}/${url}`,
         method: "GET",
       },
       {
-        userHash: tokenResponse.userHash,
-        XSTSToken: tokenResponse.XSTSToken,
+        userHash: uhash,
+        XSTSToken: token,
       },
       2
     );
+}
+catch(err){res.status(500).send(err)};
   },
   async ChangeGamerTag(xuid,uhash,token, newgt)
   {
     xuid = parseInt(xuid)
-    console.log(xuid);
     return await XboxLiveAPI.call(
       {
         url: "https://accounts.xboxlive.com//users/current/profile/gamertag",

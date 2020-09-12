@@ -40,51 +40,92 @@ app.post("/login", async (req, res) => {
 });
 
 app.post("/profile", async (req, res) => {
-  xboxliveservice
-    .XBoxLiveAccountDetails(
-      req.body.gamerTag,
-      req.body.username,
-      req.body.password
+ 
+  xboxliveservice.XBoxLiveAccountDetails(
+      req.body.xuid,
+      req.body.uhash,
+      req.body.token
     )
-    .then((results) => res.send(results));
+    .then((results) =>{res.send(results)}).catch((err)=>{res.status(500).send(err)});
 });
 
-app.post("/createchannel", async (req, res) => {
-  
-})
+app.post("/Friendsprofile", async (req, res) => {
+  var baseurl="https://profile.xboxlive.com";
+  var url=`users/batch/profile/settings`;
+  xboxliveservice.XBoxCustomPostAPI(
+    baseurl,
+    url,
+      req.body.uhash,
+      req.body.token,
+      req.body.xuid,
+    )
+    .then((results) =>{res.send(results)}).catch((err)=>{res.status(500).send(err)});
+});
+
+app.post("/titles", async (req, res) => {
+
+  var baseurl="https://achievements.xboxlive.com";
+  var url=`users/xuid(${req.body.xuid})/history/titles`;
+  xboxliveservice.XBoxCustomGETAPI(
+    baseurl,
+    url,
+    req.body.uhash,
+    req.body.token
+  )
+  .then((results) =>{ res.send(results)});
+});
+
+app.post("/family", async (req, res) => {
+  var baseurl="https://accounts.xboxlive.com";
+  var url=`family/memberXuid(${req.body.xuid})`;
+  xboxliveservice.XBoxCustomGETAPI(
+    baseurl,
+    url,
+    req.body.uhash,
+    req.body.token
+  )
+  .then((results) =>{ res.send(results)});
+});
+
+app.post("/achievements", async (req, res) => {
+  var baseurl="https://achievements.xboxlive.com";
+  var url=`users/xuid(${req.body.xuid})/achievements?unlockedOnly=true&orderBy=UnlockTime`;
+  xboxliveservice.XBoxCustomGETAPI(
+    baseurl,
+    url,
+    req.body.uhash,
+    req.body.token
+  )
+  .then((results) =>{ res.send(results)});
+});
 
 app.post("/screenshots", async (req, res) => {
-  console.log("called");
-  xboxliveservice.
-  getMyScreenshots(
+  xboxliveservice.getMyScreenshots(
     req.body.xuid,
     req.body.uhash,
     req.body.token
     )
     .then((results) =>{ 
-      res.send(results)});
+      res.send(results)}).catch((err)=>{res.status(500).send(err)});
 
 });
 
 app.post("/gameclips", async (req, res) => {
-  xboxliveservice.
-  getMyGamerClips(
+  xboxliveservice.getMyGamerClips(
     req.body.xuid,
     req.body.uhash,
     req.body.token
     )
-  .then((results) => res.send(results));
+  .then((results) => res.send(results)).catch((err)=>{res.status(500).send(err)});
 });
 
 app.post("/getfriends", async (req, res) => {
-  console.log("called");
-  xboxliveservice.
-  getMyfriends(
+  xboxliveservice. getMyfriends(
     req.body.xuid,
     req.body.uhash,
     req.body.token
     )
-  .then((results) =>{ console.log(results); res.send(results)});
+  .then((results) =>{ res.send(results)}).catch((err)=>{res.status(500).send(err)});
 });
 
 app.post("/gamertag", async (req, res) => {
