@@ -126,8 +126,9 @@ module.exports = {
   {
     return await XboxLiveAPI.call(
       {
-        url: "https://gameclipsmetadata.xboxlive.com//users/me/clips",
+        url: "https://gameclipsmetadata.xboxlive.com//users/me/clips?maxItems=10",
         method: "GET",
+        
       },
       {
         userHash: uhash,
