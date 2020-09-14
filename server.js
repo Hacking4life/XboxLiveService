@@ -50,6 +50,9 @@ app.post("/profile", async (req, res) => {
 });
 
 app.post("/Friendsprofile", async (req, res) => {
+  
+  var xuids=[] ;
+  xuids = req.body.xuid.toString().split(',');
   var baseurl="https://profile.xboxlive.com";
   var url=`users/batch/profile/settings`;
   xboxliveservice.XBoxCustomPostAPI(
@@ -57,7 +60,7 @@ app.post("/Friendsprofile", async (req, res) => {
     url,
       req.body.uhash,
       req.body.token,
-      req.body.xuid,
+      xuids,
     )
     .then((results) =>{res.send(results)}).catch((err)=>{res.status(500).send(err)});
 });
